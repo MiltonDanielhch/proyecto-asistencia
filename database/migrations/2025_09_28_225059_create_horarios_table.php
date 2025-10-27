@@ -24,6 +24,7 @@ return new class extends Migration
             $table->json('dias_laborales');
             $table->boolean('flexible')->default(false);
             $table->boolean('nocturno')->default(false);
+            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             $table->foreignId('creado_por')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->index(['empresa_id']);

@@ -12,103 +12,57 @@ class RegistrosAsistenciaSeeder extends Seeder
 {
     public function run(): void
     {
-        $empleados  = Empleado::where('estado', 'activo')->get();
-        $dispositivos = Dispositivo::where('estado', 'activo')->get();
+        $emp = Empleado::with('departamento.sucursal')->where('estado', 'activo')->get();
+        $dev = Dispositivo::with('sucursal')->get()->keyBy('sucursal_id');
+
         $hoy = Carbon::now()->startOfDay();
 
-        foreach ($empleados as $emp) {
+        foreach ($emp as $e) {
+            $suc = $e->departamento->sucursal;
+            if (! $suc) {
+                $suc = \App\Models\Sucursal::where('ciudad', 'Trinidad')->firstOrFail();
+            }
+            $disp  = $dev[$suc->id];
+            $coords = [$suc->latitud, $suc->longitud];
+
+
             // 7 días hacia atrás
             foreach (range(0, 6) as $diasAtras) {
                 $fecha = $hoy->copy()->subDays($diasAtras);
 
-                /* --------------------------------------------------
-                 * Entrada mañana
-                 * -------------------------------------------------- */
-                $entrada = $fecha->copy()->setTimeFromTimeString('07:45');
-                RegistroAsistencia::create([
-                    'empleado_id'            => $emp->id,
-                    'dispositivo_id'         => $dispositivos->random()->id,
-                    'tipo_marcaje'           => 'entrada',
-                    'fecha_local'            => $fecha->toDateString(),
-                    'hora_local'             => $entrada->format('H:i'),
-                    'fecha_hora'             => $entrada,
-                    'tipo_verificacion'      => 'huella',
-                    'latitud'                => -14.8333,
-                    'longitud'               => -64.9000,
-                    'precision_ubicacion'    => 5.50,
-                    'confianza_verificacion' => 96.30,
-                    'procesado'              => false,
-                    'incidencia_id'          => null,
-                    'estado_validacion'      => 'pendiente',
-                    'observaciones'          => null,
-                ]);
+                /* ---------- JORNADA COMPLETA 4 MARCAS ---------- */
+                $marcas = [
+                    ['tipo' => 'entrada',           'hora' => '07:' . rand(40, 55), 'geo' => true],
+                    ['tipo' => 'salida_almuerzo',   'hora' => '12:00',              'geo' => false],
+                    ['tipo' => 'entrada_almuerzo',  'hora' => '13:0' . rand(0, 9),  'geo' => false],
+                    ['tipo' => 'salida',            'hora' => '17:' . rand(25, 40), 'geo' => true],
+                ];
 
-                /* --------------------------------------------------
-                 * Salida almuerzo
-                 * -------------------------------------------------- */
-                $salidaA = $fecha->copy()->setTimeFromTimeString('12:00');
-                RegistroAsistencia::create([
-                    'empleado_id'            => $emp->id,
-                    'dispositivo_id'         => $dispositivos->random()->id,
-                    'tipo_marcaje'           => 'salida_almuerzo',
-                    'fecha_local'            => $fecha->toDateString(),
-                    'hora_local'             => $salidaA->format('H:i'),
-                    'fecha_hora'             => $salidaA,
-                    'tipo_verificacion'      => 'rostro',
-                    'latitud'                => null,
-                    'longitud'               => null,
-                    'precision_ubicacion'    => null,
-                    'confianza_verificacion' => 94.10,
-                    'procesado'              => false,
-                    'incidencia_id'          => null,
-                    'estado_validacion'      => 'pendiente',
-                    'observaciones'          => null,
-                ]);
+                foreach ($marcas as $m) {
+                    [$h, $min] = explode(':', $m['hora']);
+                    $dt = $fecha->copy()->setTime($h, $min);
 
-                /* --------------------------------------------------
-                 * Entrada tarde
-                 * -------------------------------------------------- */
-                $entradaT = $fecha->copy()->setTimeFromTimeString('13:05');
-                RegistroAsistencia::create([
-                    'empleado_id'            => $emp->id,
-                    'dispositivo_id'         => $dispositivos->random()->id,
-                    'tipo_marcaje'           => 'entrada_almuerzo',
-                    'fecha_local'            => $fecha->toDateString(),
-                    'hora_local'             => $entradaT->format('H:i'),
-                    'fecha_hora'             => $entradaT,
-                    'tipo_verificacion'      => 'huella',
-                    'latitud'                => null,
-                    'longitud'               => null,
-                    'precision_ubicacion'    => null,
-                    'confianza_verificacion' => 97.20,
-                    'procesado'              => false,
-                    'incidencia_id'          => null,
-                    'estado_validacion'      => 'pendiente',
-                    'observaciones'          => null,
-                ]);
-
-                /* --------------------------------------------------
-                 * Salida día
-                 * -------------------------------------------------- */
-                $salida = $fecha->copy()->setTimeFromTimeString('17:30');
-                RegistroAsistencia::create([
-                    'empleado_id'            => $emp->id,
-                    'dispositivo_id'         => $dispositivos->random()->id,
-                    'tipo_marcaje'           => 'salida',
-                    'fecha_local'            => $fecha->toDateString(),
-                    'hora_local'             => $salida->format('H:i'),
-                    'fecha_hora'             => $salida,
-                    'tipo_verificacion'      => 'huella',
-                    'latitud'                => -14.8333,
-                    'longitud'               => -64.9000,
-                    'precision_ubicacion'    => 4.80,
-                    'confianza_verificacion' => 95.40,
-                    'procesado'              => false,
-                    'incidencia_id'          => null,
-                    'estado_validacion'      => 'pendiente',
-                    'observaciones'          => null,
-                ]);
+                    RegistroAsistencia::create([
+                        'empleado_id'            => $e->id,
+                        'dispositivo_id'         => $disp->id,
+                        'tipo_marcaje'           => $m['tipo'],
+                        'fecha_local'            => $dt->toDateString(),
+                        'hora_local'             => $dt->format('H:i'),
+                        'fecha_hora'             => $dt,
+                        'tipo_verificacion'      => collect(['huella', 'rostro'])->random(),
+                        'latitud'                => $m['geo'] ? $coords[0] : null,
+                        'longitud'               => $m['geo'] ? $coords[1] : null,
+                        'precision_ubicacion'    => $m['geo'] ? rand(3, 6) + rand(0, 99) / 100 : null,
+                        'confianza_verificacion' => rand(93, 98) + rand(0, 99) / 100,
+                        'procesado'              => false,
+                        'incidencia_id'          => null,
+                        'estado_validacion'      => 'pendiente',
+                        'observaciones'          => null,
+                    ]);
+                }
             }
         }
+
+        $this->command->info('Registros de asistencia creados: ' . ($emp->count() * 7 * 4));
     }
 }

@@ -30,52 +30,13 @@ class AsistenciaMenuAppendSeeder extends Seeder
         ],
 
         // PERSONAS (IDTGB)
-        [
-            'title'      => 'Personas',
-            'order'      => 10,
-            'icon_class' => 'voyager-person',
-            'route'      => 'admin.people.index',
-            'url'        => '',
-        ],
-
-        // CATÁLOGOS IDTGB
-        [
-            'title'      => 'Catálogos IDTGB',
-            'order'      => 11,
-            'icon_class' => 'fa-solid fa-folder-tree',
-            'route'      => null,
-            'url'        => '',
-            'children'   => [
-                ['title' => 'Parentescos', 'route' => 'admin.parentescos.index', 'icon_class' => 'fa-solid fa-people-group', 'order' => 1],
-                ['title' => 'Tasas',       'route' => 'admin.tasas.index',       'icon_class' => 'fa-solid fa-percent',    'order' => 2],
-                ['title' => 'Exenciones',  'route' => 'admin.exenciones.index',  'icon_class' => 'fa-solid fa-gift',       'order' => 3],
-            ],
-        ],
-
-        // INMUEBLES
-        [
-            'title'      => 'Inmuebles',
-            'order'      => 12,
-            'icon_class' => 'fa-solid fa-building',
-            'route'      => null,
-            'url'        => '',
-            'children'   => [
-                ['title' => 'Inmuebles', 'route' => 'admin.inmuebles.index', 'icon_class' => 'fa-solid fa-home',               'order' => 1],
-                ['title' => 'Avalúos',   'route' => 'admin.avaluos.index',   'icon_class' => 'fa-solid fa-file-invoice-dollar','order' => 2],
-            ],
-        ],
-
-        // TRÁMITES
-        [
-            'title'      => 'Trámites IDTGB',
-            'order'      => 13,
-            'icon_class' => 'fa-solid fa-file-lines',
-            'route'      => null,
-            'url'        => '',
-            'children'   => [
-                ['title' => 'Trámites', 'route' => 'admin.tramites.index', 'icon_class' => 'fa-solid fa-folder-open', 'order' => 1],
-            ],
-        ],
+        // [
+        //     'title'      => 'Personas',
+        //     'order'      => 10,
+        //     'icon_class' => 'voyager-person',
+        //     'route'      => 'admin.people.index',
+        //     'url'        => '',
+        // ],
     ];
 
     public function run()

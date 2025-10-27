@@ -51,6 +51,11 @@ class Empleado extends Model
         return $this->belongsTo(Departamento::class);
     }
 
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursal::class);
+    }
+
     public function usuario()
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id');

@@ -10,30 +10,26 @@ class ReportesAsistenciaSeeder extends Seeder
 {
     public function run(): void
     {
-        /* ----------------------------------------------------------
-         * 1. Reporte COMPLETADO (ejemplo descargable)
-         * ---------------------------------------------------------- */
-        $path = 'reportes/asistencia/ecobeni_semana_38_2024.xlsx';
+        /* 1. Reporte COMPLETADO (descargable) */
+        $path = 'reportes/asistencia/gobernacion_beni_semana_38_2024.xlsx';
         Storage::disk('public')->put($path, ''); // archivo vacío de prueba
 
         ReporteAsistencia::create([
             'empresa_id'     => 1,
-            'nombre_reporte' => 'Semana 38 – EcoBeni',
+            'nombre_reporte' => 'Semana 38 – Gobernación del Beni',
             'fecha_inicio'   => now()->startOfWeek()->subWeek(),
             'fecha_fin'      => now()->startOfWeek()->subWeek()->endOfWeek(),
             'tipo'           => 'semanal',
-            'filtros'        => ['sucursales' => [1, 2], 'departamentos' => [1, 2, 3]],
+            'filtros'        => ['sucursales' => [1, 2, 3, 4, 5], 'departamentos' => [1, 2, 3, 4, 5, 6]],
             'generado_por'   => 1,
             'archivo_path'   => $path,
             'estado'         => 'completado',
         ]);
 
-        /* ----------------------------------------------------------
-         * 2 y 3. Reportes en PROCESO
-         * ---------------------------------------------------------- */
+        /* 2. Reporte en PROCESO */
         ReporteAsistencia::create([
             'empresa_id'     => 1,
-            'nombre_reporte' => 'Septiembre 2025 – EcoBeni (procesando)',
+            'nombre_reporte' => 'Octubre 2025 – Gobernación del Beni (procesando)',
             'fecha_inicio'   => now()->startOfMonth(),
             'fecha_fin'      => now()->endOfMonth(),
             'tipo'           => 'mensual',
@@ -43,16 +39,18 @@ class ReportesAsistenciaSeeder extends Seeder
             'estado'         => 'procesando',
         ]);
 
+        /* 3. Reporte con ERROR */
         ReporteAsistencia::create([
-            'empresa_id'     => 2,
-            'nombre_reporte' => 'Rango personalizado – Amazonía Global',
+            'empresa_id'     => 1,
+            'nombre_reporte' => 'Rango personalizado – Gobernación del Beni (error)',
             'fecha_inicio'   => now()->subDays(15),
             'fecha_fin'      => now()->subDays(5),
             'tipo'           => 'custom',
-            'filtros'        => ['empleados' => [7, 8]],
+            'filtros'        => ['empleados' => [1, 2, 3]],
             'generado_por'   => 1,
             'archivo_path'   => null,
-            'estado'         => 'procesando',
+            'estado'         => 'error',
+            'error'          => 'Excepción: archivo temporal no generado – falta espacio en disco.',
         ]);
     }
 }

@@ -30,7 +30,16 @@
                         @endif
                     </td>
                     <td>
-                        <span class="label label-{{ $d->estado == 'activo' ? 'success' : 'default' }}">
+                        @php
+                            $label = match($d->estado) {
+                                'activo'     => 'success',
+                                'inactivo'   => 'danger',
+                                'vacaciones' => 'info',
+                                'licencia'   => 'warning',
+                                default      => 'default'
+                            };
+                        @endphp
+                        <span class="label label-{{ $label }}">
                             {{ ucfirst($d->estado) }}
                         </span>
                     </td>

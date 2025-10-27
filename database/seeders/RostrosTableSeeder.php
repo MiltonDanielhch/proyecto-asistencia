@@ -3,30 +3,32 @@
 namespace Database\Seeders;
 
 use App\Models\Rostro;
-use App\Models\DispositivoEmpleado;
+use App\Models\Empleado;
 use Illuminate\Database\Seeder;
 
 class RostrosTableSeeder extends Seeder
 {
     public function run(): void
     {
-        /* ----------------------------------------------------------
-         * Un solo template facial por cada vínculo activo
-         * ---------------------------------------------------------- */
-        $asignaciones = DispositivoEmpleado::where('estado', 'activo')->get();
+        Rostro::query()->delete();
 
-        foreach ($asignaciones as $asig) {
-            /* 1 KB de datos aleatorios simula template ZK facial */
-            $fakeTemplate = \Str::random(1024);
+        /* 1 template facial por empleado activo */
+        foreach (Empleado::where('estado', 'activo')->cursor() as $emp) {
+            /* Tomamos el zk_user_id más bajo que ya tiene asignado */
+            $zkUserId = \DB::table('dispositivo_empleado')
+                ->where('empleado_id', $emp->id)
+                ->min('zk_user_id') ?? $emp->id;
 
             Rostro::create([
-                'empleado_id'      => $asig->empleado_id,
-                'zk_user_id'       => $asig->zk_user_id,
-                'template_rostro'  => $fakeTemplate,
-                'foto_rostro'      => null, // se puede llenar después
+                'empleado_id'      => $emp->id,
+                'zk_user_id'       => $zkUserId,
+                'template_rostro'  => \Str::random(1024), // dummy
+                'foto_rostro'      => null,
                 'calidad'          => 'media',
                 'estado'           => 'activo',
             ]);
         }
+
+        $this->command->info('Templates faciales creados: ' . Empleado::where('estado', 'activo')->count());
     }
 }

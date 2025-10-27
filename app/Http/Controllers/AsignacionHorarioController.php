@@ -48,7 +48,9 @@ class AsignacionHorarioController extends Controller
         $this->authorize('create', AsignacionHorario::class);
         $empleados = Empleado::where('estado', 'activo')->orderBy('apellidos')->orderBy('nombres')->get();
         $horarios  = Horario::with('empresa')->where('estado', 'activo')->orderBy('nombre_horario')->get();
-        return view('admin.asignacion-horarios.edit-add', compact('empleados', 'horarios'));
+        $asignacion = null; // <-- clave: evita "Undefined variable"
+
+        return view('admin.asignacion-horarios.edit-add', compact('empleados', 'horarios', 'asignacion'));
     }
 
     public function store(StoreAsignacionHorarioRequest $request)
@@ -66,7 +68,13 @@ class AsignacionHorarioController extends Controller
         $this->authorize('update', $asignacionHorario);
         $empleados = Empleado::where('estado', 'activo')->orderBy('apellidos')->orderBy('nombres')->get();
         $horarios  = Horario::with('empresa')->where('estado', 'activo')->orderBy('nombre_horario')->get();
-        return view('admin.asignacion-horarios.edit-add', compact('asignacionHorario', 'empleados', 'horarios'));
+
+        // Enviamos como $asignacion para que la vista funcione tanto en create como en edit
+        return view('admin.asignacion-horarios.edit-add', [
+            'asignacion' => $asignacionHorario,
+            'empleados'  => $empleados,
+            'horarios'   => $horarios,
+        ]);
     }
 
     public function update(UpdateAsignacionHorarioRequest $request, AsignacionHorario $asignacionHorario)

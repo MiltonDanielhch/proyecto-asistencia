@@ -3,62 +3,76 @@
 namespace Database\Seeders;
 
 use App\Models\Departamento;
+use App\Models\Sucursal;
 use Illuminate\Database\Seeder;
 
 class DepartamentosTableSeeder extends Seeder
 {
     public function run(): void
     {
-        // Trinidad (sucursal 1)
-        Departamento::create([
-            'sucursal_id'           => 1,
-            'nombre_departamento'   => 'Recursos Humanos',
-            'descripcion'           => 'Gestión del talento humano en Trinidad',
-            'jefe_empleado_id'      => null, // se actualizará después de tener empleados
-            'creado_por'            => 1,
-        ]);
-        Departamento::create([
-            'sucursal_id'           => 1,
-            'nombre_departamento'   => 'Operaciones',
-            'descripcion'           => 'Control de asistencia y logística',
-            'jefe_empleado_id'      => null,
-            'creado_por'            => 1,
-        ]);
+        // Mapeo ciudad → sucursal ya creada
+        $sucursales = Sucursal::whereHas('empresa', fn ($q) => $q->where('ruc', '10203010900015'))
+            ->pluck('id', 'ciudad');
 
-        // Riberalta (sucursal 2)
-        Departamento::create([
-            'sucursal_id'           => 2,
-            'nombre_departamento'   => 'Planta Riberalta',
-            'descripcion'           => 'Área de producción amazónica',
-            'jefe_empleado_id'      => null,
-            'creado_por'            => 1,
-        ]);
+        $departamentos = [
+            /* TRINIDAD (casa matriz) */
+            [
+                'ciudad'                => 'Trinidad',
+                'nombre_departamento'   => 'Recursos Humanos',
+                'descripcion'           => 'Gestión de personal, nómina y asistencia.',
+            ],
+            [
+                'ciudad'                => 'Trinidad',
+                'nombre_departamento'   => 'Planificación y Desarrollo',
+                'descripcion'           => 'Planificación estratégica, proyectos y estadística.',
+            ],
+            [
+                'ciudad'                => 'Trinidad',
+                'nombre_departamento'   => 'Tesorería General',
+                'descripcion'           => 'Control de ingresos, egresos y finanzas públicas.',
+            ],
 
-        // Guayaramerín (sucursal 3)
-        Departamento::create([
-            'sucursal_id'           => 3,
-            'nombre_departamento'   => 'Puerto Interior',
-            'descripcion'           => 'Operaciones fluviales y aduaneras',
-            'jefe_empleado_id'      => null,
-            'creado_por'            => 1,
-        ]);
+            /* RIBERALTA */
+            [
+                'ciudad'                => 'Riberalta',
+                'nombre_departamento'   => 'Oficina de Apoyo Provincial Vaca Díez',
+                'descripcion'           => 'Coordinación de programas sociales y obras en la provincia.',
+            ],
 
-        // Santa Cruz (sucursal 4)
-        Departamento::create([
-            'sucursal_id'           => 4,
-            'nombre_departamento'   => 'Comercial',
-            'descripcion'           => 'Ventas y atención al cliente',
-            'jefe_empleado_id'      => null,
-            'creado_por'            => 1,
-        ]);
+            /* GUAYARAMERÍN */
+            [
+                'ciudad'                => 'Guayaramerín',
+                'nombre_departamento'   => 'Oficina de Apoyo Provincial Mamoré',
+                'descripcion'           => 'Gestión de infraestructura y servicios públicos.',
+            ],
 
-        // La Paz (sucursal 5)
-        Departamento::create([
-            'sucursal_id'           => 5,
-            'nombre_departamento'   => 'Administración Central',
-            'descripcion'           => 'Finanzas y soporte corporativo',
-            'jefe_empleado_id'      => null,
-            'creado_por'            => 1,
-        ]);
+            /* RURRENABAQUE */
+            [
+                'ciudad'                => 'Rurrenabaque',
+                'nombre_departamento'   => 'Oficina de Apoyo Provincial General José Ballivián',
+                'descripcion'           => 'Promoción turística y mantenimiento vial.',
+            ],
+
+            /* SAN BORJA */
+            [
+                'ciudad'                => 'San Borja',
+                'nombre_departamento'   => 'Oficina de Apoyo Provincial Marbán',
+                'descripcion'           => 'Apoyo agropecuario y medio ambiente.',
+            ],
+        ];
+
+        foreach ($departamentos as $d) {
+            Departamento::firstOrCreate(
+                [
+                    'sucursal_id'         => $sucursales[$d['ciudad']],
+                    'nombre_departamento' => $d['nombre_departamento'],
+                ],
+                [
+                    'descripcion'      => $d['descripcion'],
+                    'jefe_empleado_id' => null, // se asignará después
+                    'creado_por'       => 1,
+                ]
+            );
+        }
     }
 }

@@ -46,7 +46,8 @@ class DepartamentoController extends Controller
         $this->authorize('create', Departamento::class);
         $sucursales = Sucursal::with('empresa')->where('estado', 'activo')->get();
         $empleados  = Empleado::where('estado', 'activo')->get();
-        return view('admin.departamentos.edit-add', compact('sucursales', 'empleados'));
+        $departamento = null;
+        return view('admin.departamentos.edit-add', compact('sucursales', 'empleados', 'departamento'));
     }
 
     public function store(StoreDepartamentoRequest $request)

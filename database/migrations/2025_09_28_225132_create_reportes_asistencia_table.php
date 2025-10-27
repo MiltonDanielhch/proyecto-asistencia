@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('generado_por')->nullable()->constrained('users')->nullOnDelete();
             $table->string('archivo_path')->nullable();
             $table->enum('estado', ['procesando', 'completado', 'error'])->default('procesando');
+            $table->text('error')->nullable();
             $table->timestamps();
 
             $table->index(['empresa_id', 'fecha_inicio']);

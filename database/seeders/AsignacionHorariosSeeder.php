@@ -11,29 +11,31 @@ class AsignacionHorariosSeeder extends Seeder
 {
     public function run(): void
     {
-        /* ----------------------------------------------------------
-         * Horarios disponibles por empresa
-         * ---------------------------------------------------------- */
-        $horariosEcoBeni   = Horario::where('empresa_id', 1)->get();
-        $horariosAmzGlobal = Horario::where('empresa_id', 2)->get();
+        $adm   = Horario::where('empresa_id', 1)
+                        ->where('nombre_horario', 'Administrativo Gobernación')
+                        ->firstOrFail();
 
-        /* ----------------------------------------------------------
-         * Empleados activos
-         * ---------------------------------------------------------- */
-        $empleados = Empleado::where('estado', 'activo')->get();
+        $reduc = Horario::where('empresa_id', 1)
+                        ->where('nombre_horario', 'Horario Reducido Provincia')
+                        ->firstOrFail();
 
-        foreach ($empleados as $emp) {
-            $horario = $emp->empresa_id === 1
-                ? $horariosEcoBeni->random()
-                : $horariosAmzGlobal->random();
+        Empleado::with('departamento.sucursal')
+            ->where('estado', 'activo')
+            ->chunk(50, function ($emps) use ($adm, $reduc) {
+                foreach ($emps as $emp) {
+                    $ciudad = $emp->departamento->sucursal->ciudad ?? 'Trinidad';
+                    $horario = $ciudad === 'Trinidad' ? $adm : $reduc;
 
-            AsignacionHorario::create([
-                'empleado_id'  => $emp->id,
-                'horario_id'   => $horario->id,
-                'fecha_inicio' => now()->subDays(7)->toDateString(), // vigente desde hace 1 semana
-                'fecha_fin'    => null,                              // indefinido
-                'activo'       => true,
-            ]);
-        }
+                    AsignacionHorario::firstOrCreate(
+                        ['empleado_id' => $emp->id],
+                        [
+                            'horario_id'   => $horario->id,
+                            'fecha_inicio' => now()->subDays(7),
+                            'fecha_fin'    => null,
+                            'activo'       => true,
+                        ]
+                    );
+                }
+            });
     }
 }

@@ -12,24 +12,25 @@ class DispositivoEmpleadoSeeder extends Seeder
     public function run(): void
     {
         /* ----------------------------------------------------------
-         * Asignamos 2-3 empleados por dispositivo (zk_user_id 1..N)
+         * 1 dispositivo por oficina (IDs 1-5) y los empleados
+         * que ya están creados en esas 5 sucursales.
          * ---------------------------------------------------------- */
 
-        // TRINIDAD – Dispositivos 1 y 2
+        // Trinidad (2 dispositivos como ejemplo)
         $this->asignar(1, [1, 2]);   // zk_user_id 1,2
         $this->asignar(2, [3, 4]);   // zk_user_id 3,4
 
-        // RIIBERALTA – Dispositivo 3
-        $this->asignar(3, [5]);      // zk_user_id 5
+        // Riberalta
+        $this->asignar(3, [5]);
 
-        // GUAYARAMERÍN – Dispositivo 4
-        $this->asignar(4, [6]);      // zk_user_id 6
+        // Guayaramerín
+        $this->asignar(4, [6]);
 
-        // SANTA CRUZ – Dispositivo 5
-        $this->asignar(5, [7]);      // zk_user_id 7
+        // Rurrenabaque
+        $this->asignar(5, [7]);
 
-        // LA PAZ – Dispositivo 6
-        $this->asignar(6, [8]);      // zk_user_id 8
+        // San Borja
+        $this->asignar(5, [8]);
     }
 
     /* ------------------------------------------------------------------
@@ -37,20 +38,23 @@ class DispositivoEmpleadoSeeder extends Seeder
      * ------------------------------------------------------------------ */
     private function asignar(int $dispositivoId, array $empleadosIds): void
     {
-        static $zkUserId = 1; // ID interno del reloj
+        static $zkUserId = 1;
 
         foreach ($empleadosIds as $empId) {
-            DispositivoEmpleado::create([
-                'empleado_id'           => $empId,
-                'dispositivo_id'        => $dispositivoId,
-                'zk_user_id'            => $zkUserId,
-                'privilegio'            => 'usuario',
-                'tarjeta_id'            => null,
-                'estado'                => 'activo',
-                'estado_sincronizacion' => 'pendiente',
-                'ultima_sincronizacion' => null,
-            ]);
-            $zkUserId++;
+            DispositivoEmpleado::firstOrCreate(
+                [
+                    'empleado_id'    => $empId,
+                    'dispositivo_id' => $dispositivoId,
+                ],
+                [
+                    'zk_user_id'            => $zkUserId++,
+                    'privilegio'            => 'usuario',
+                    'tarjeta_id'            => null,
+                    'estado'                => 'activo',
+                    'estado_sincronizacion' => 'pendiente',
+                    'ultima_sincronizacion' => null,
+                ]
+            );
         }
     }
 }

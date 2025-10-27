@@ -18,6 +18,11 @@ class Departamento extends Model
         'descripcion',
         'jefe_empleado_id',
         'creado_por',
+        'estado',
+    ];
+
+    protected $casts = [
+        'estado' => 'string',
     ];
 
     /* -------------------------------------------------------------
